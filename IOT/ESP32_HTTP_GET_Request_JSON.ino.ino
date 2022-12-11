@@ -3,11 +3,11 @@
 #include <WiFiClientSecure.h>
 #include <Arduino_JSON.h>
 
-const char* ssid = "NEILTON_COLOCA_AQUI_O_SSID_DA_REDE";
-const char* password = "NEILTON_COLOCA_AQUI_O_PASSWORD_DA_REDE";
+const char* ssid = "Wokwi-GUEST";
+const char* password = "";
 
 //Your IP address or domain name with URL path
-const char* serverName = "https://www.trevotecnologia.com.br/IOT/esp-outputs-action.php?action=outputs_state&board=1";
+const String serverName = "https://www.trevotecnologia.com.br/IOT/view/esp-outputs-action.php?action=outputs_state&board=18&id_pessoa=70";
 
 // Update interval time set to 5 seconds
 const long interval = 5000;
@@ -35,39 +35,56 @@ void loop() {
   if(currentMillis - previousMillis >= interval) {
      // Check WiFi connection status
     if(WiFi.status()== WL_CONNECTED ){ 
-      outputsState = httpGETRequest(serverName);
-      Serial.println(outputsState);
-      JSONVar myObject = JSON.parse(outputsState);
+      Serial.println("iniciando recebimento de dados...");
+
+      HTTPClient http;
+      http.begin(serverName);
+
+      int httpResponseCode = http.GET();
+
+      if (httpResponseCode > 0) {
+
+          Serial.print("HTTP ");
+          Serial.println(httpResponseCode);
+          String payload = http.getString();
+          Serial.println();
+          Serial.println(payload);
+          JSONVar myObject = JSON.parse(payload);
   
-      // JSON.typeof(jsonVar) can be used to get the type of the var
-      if (JSON.typeof(myObject) == "undefined") {
-        Serial.println("Parsing input failed!");
-        return;
+          // JSON.typeof(jsonVar) can be used to get the type of the var
+          if (JSON.typeof(myObject) == "undefined") {
+            Serial.println("Parsing input failed!");
+            return;
+          }
+    
+        // Serial.print("JSON object = ");
+        // Serial.println(myObject);
+    
+         // myObject.keys() can be used to get an array of all the keys in the object
+          JSONVar keys = myObject.keys();
+    
+          for (int i = 0; i < keys.length(); i++) {
+            JSONVar value = myObject[keys[i]];
+            Serial.print("GPIO: ");
+            Serial.print(keys[i]);
+            Serial.print(" - SET to: ");
+            Serial.println(value);
+            pinMode(atoi(keys[i]), OUTPUT);
+		        if(atoi(value)==1){
+			        digitalWrite(atoi(keys[i]), HIGH);
+		        }else{
+		        	digitalWrite(atoi(keys[i]), LOW);
+		        }
+         }
+         // save the last HTTP GET Request
+          previousMillis = currentMillis;
+      }else {
+        Serial.print("Error code: ");
+        Serial.println(httpResponseCode);
+        Serial.println(":-(");
       }
-    
-     // Serial.print("JSON object = ");
-     // Serial.println(myObject);
-    
-      // myObject.keys() can be used to get an array of all the keys in the object
-      JSONVar keys = myObject.keys();
-    
-      for (int i = 0; i < keys.length(); i++) {
-        JSONVar value = myObject[keys[i]];
-        Serial.print("GPIO: ");
-        Serial.print(keys[i]);
-        Serial.print(" - SET to: ");
-        Serial.println(value);
-        pinMode(atoi(keys[i]), OUTPUT);
-		if(atoi(value)==1){
-			digitalWrite(atoi(keys[i]), HIGH);
-		}else{
-			digitalWrite(atoi(keys[i]), LOW);
-		}
-      }
-      // save the last HTTP GET Request
-      previousMillis = currentMillis;
-    }
-    else {
+
+    }else {
       Serial.println("WiFi Disconnected");
     }
   }
