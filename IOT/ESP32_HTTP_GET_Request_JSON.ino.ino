@@ -7,7 +7,7 @@ const char* ssid = "Wokwi-GUEST";
 const char* password = "";
 
 //Your IP address or domain name with URL path
-const String serverName = "https://www.trevotecnologia.com.br/IOT/view/esp-outputs-action.php?action=outputs_state&board=18&id_pessoa=70";
+const String serverName = "https://www.XXX.com.br/IOT/view/esp-outputs-action.php?action=outputs_state&board=18&id_pessoa=70";
 
 // Update interval time set to 5 seconds
 const long interval = 5000;
