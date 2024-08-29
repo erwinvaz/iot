@@ -11,7 +11,7 @@ const char* ssid = "REPLACE_WITH_YOUR_SSID";
 const char* password = "REPLACE_WITH_YOUR_PASSWORD";
 
 // Your IP address or domain name with URL path
-const char* serverName = "https://www.trevotecnologia.com.br/IOT/esp-outputs-action.php?action=outputs_state&board=1";
+const char* serverName = "https://www.XXX.com.br/IOT/esp-outputs-action.php?action=outputs_state&board=1";
 
 // Update interval time set to 5 seconds
 const long interval = 5000;
